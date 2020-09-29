@@ -1,5 +1,4 @@
 import { action, computed, configure, observable, runInAction } from "mobx";
-import { createContext } from "react";
 import { UserApi } from "../api/userApi";
 import { IUser, IUserFormValues } from "../models/user";
 import { RootStore } from "./rootStore";
@@ -38,6 +37,7 @@ export default class UserStore {
                 this.user = user;
                 this.submitting = false;
             });
+            console.log(user);
             this.rootStore.commonStore.setToken(user.token);
             history.push("/activities");
         } catch (error) {

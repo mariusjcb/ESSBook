@@ -1,8 +1,9 @@
 import { action, computed, configure, observable, runInAction } from "mobx";
-import { createContext, SyntheticEvent } from "react";
-import { IActivity } from "../models/activity";
+import { SyntheticEvent } from "react";
+import { IActivity, ICommentTransport } from "../models/activity";
 import { ActivitiesApi } from "../api/activitesApi";
 import { RootStore } from "./rootStore";
+import { HubConnection, LogLevel, HubConnectionBuilder } from '@microsoft/signalr';
 
 configure({ enforceActions: "always" });
 
@@ -15,6 +16,41 @@ export default class ActivityStore {
   @observable submitting = false;
   @observable editMode = false;
   @observable buttonTarget = "";
+  @observable.ref hubConnection: HubConnection | null = null;
+
+  @action connectHub = () => {
+    this.hubConnection = new HubConnectionBuilder()
+      .withUrl('http://localhost:5000/chat', {
+        accessTokenFactory: () => this.rootStore.commonStore.token!
+      }).configureLogging(LogLevel.Information).build();
+    
+    this.hubConnection?.start()
+      .then(() => console.log(this.hubConnection!.state))
+      .catch(error => console.log('Error with hub connection'));
+
+    this.hubConnection?.on('ReceiveComment', comment => {
+      runInAction(() => {
+        this.activity!.comments.push(comment);
+      });
+    })
+  }
+
+  @action disconnectHub = () => {
+    this.hubConnection?.stop();
+  }
+
+  @action addComment = async (values: any) => {
+    const comment: ICommentTransport = {
+      activityId: this.activity!.id,
+      body: values
+    }
+    console.log(comment);
+    try {
+      await this.hubConnection!.invoke('SendComment', comment);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 
   @computed get activities() {
     return Array.from(this.activityRegistry.values());

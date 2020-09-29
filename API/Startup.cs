@@ -24,6 +24,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using AutoMapper;
 using static Infrastructure.Security.IsHostRequirementHanlder;
+using API.SignalR;
+using System.Threading.Tasks;
 
 namespace API
 {
@@ -48,11 +50,12 @@ namespace API
             {
                 opt.AddPolicy("CorsPolicy", policy =>
                 {
-                    policy.AllowAnyMethod().AllowAnyHeader().AllowAnyOrigin();
+                    policy.AllowAnyHeader().AllowAnyMethod().WithOrigins("http://localhost:3000").AllowCredentials();
                 });
             });
             services.AddMediatR(typeof(List.Handler).Assembly);
             services.AddAutoMapper(typeof(List.Handler));
+            services.AddSignalR();
             services.AddApiVersioning(opt => {
                 opt.AssumeDefaultVersionWhenUnspecified = true;
                 opt.DefaultApiVersion = new ApiVersion(1, 0);
@@ -89,11 +92,23 @@ namespace API
                 {
                     opt.TokenValidationParameters = new TokenValidationParameters
                     {
-                        // ValidAlgorithms = new[] { SecurityAlgorithms.HmacSha512Signature },
-                        ValidateAudience = false,
-                        ValidateIssuer = false,
                         ValidateIssuerSigningKey = true,
-                        IssuerSigningKey = key
+                        IssuerSigningKey = key,
+                        ValidateAudience = false,
+                        ValidateIssuer = false
+                    };
+                    opt.Events = new JwtBearerEvents
+                    {
+                        OnMessageReceived = context => 
+                        {
+                            var accessToken = context.Request.Query["access_token"];
+                            var path = context.HttpContext.Request.Path;
+                            if (!string.IsNullOrEmpty(accessToken) && (path.StartsWithSegments("/chat")))
+                            {
+                                context.Token = accessToken;
+                            }
+                            return Task.CompletedTask;
+                        }
                     };
                 });
             services.AddScoped<IJWTGenerator, JWTGenerator>();
@@ -120,6 +135,7 @@ namespace API
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapHub<ChatHub>("/chat");
                 endpoints.MapControllers();
             });
         }

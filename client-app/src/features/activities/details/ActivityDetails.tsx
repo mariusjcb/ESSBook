@@ -64,7 +64,7 @@ const _ActivityDetailsPage: React.FC<RouteComponentProps<
   IDetailPageParams
 >> = ({ match }) => {
   const rootStore = useContext(RootStoreContext);
-  const { editMode, setEditMode, loadingInitial } = rootStore.activityStore;
+  const { loadingInitial } = rootStore.activityStore;
   const { activity, loadActivity } = rootStore.activityStore;
 
   useEffect(() => {

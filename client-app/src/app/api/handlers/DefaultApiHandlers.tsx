@@ -1,4 +1,4 @@
-import { AxiosRequestConfig, AxiosResponse } from "axios";
+import { AxiosResponse } from "axios";
 import { toast } from "react-toastify";
 
 export const DefaultResponseMiddleware = (r: AxiosResponse) => r.data;
@@ -12,6 +12,7 @@ export const DefaultErrorHandler = (e: any) => {
             case 401: toast.error("Access was denied. Try again."); break;
             case 404: toast.error("Content not found"); break;
             case 409: toast.error("Already exists!"); break;
+            case 403: toast.error("You can't change this resource. It's not yours. ;)"); break;
             case (status > 500 && status < 599): toast.error("Internal Server Error. Try again later."); break;
             default: break;
         }

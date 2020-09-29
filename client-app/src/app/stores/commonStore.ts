@@ -10,16 +10,17 @@ export default class CommonStore {
         reaction(
             () => this.token,
             token => {
+                console.log(token);
                 if (token) {
-                    window.localStorage.setItem('auth_token', token!);
+                    window.localStorage.setItem('access_token', token!);
                 } else {
-                    window.localStorage.removeItem('auth_token');
+                    window.localStorage.removeItem('access_token');
                 }
             }
         )
     }
 
-    @observable token: string | null = window.localStorage.getItem('auth_token');
+    @observable token: string | null = window.localStorage.getItem('access_token');
     @observable appLoaded = false;
 
     @action setToken = (token: string | null) => {

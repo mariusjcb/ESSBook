@@ -29,7 +29,7 @@ export class ApiWorker {
 
     private setupAxiosJWTAdapter() {
         axios.interceptors.request.use((config) => {
-            const token = window.localStorage.getItem('auth_token');
+            const token = window.localStorage.getItem('access_token');
             if (token) config.headers.Authorization = `Bearer ${token}`;
                 return config;
         }, error => {

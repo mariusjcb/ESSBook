@@ -1,6 +1,5 @@
 import { observer } from "mobx-react-lite";
 import React, { FormEvent, useContext, useState } from "react";
-import { Link } from "react-router-dom";
 import {
   Button,
   Form,
@@ -68,7 +67,7 @@ export const LoginForm = () => {
           </Segment>
         </Form>
         <Message>
-          New to us? <a href="#">Sign Up</a>
+          New to us? <a href="/">Sign Up</a>
         </Message>
       </Grid.Column>
     </Grid>

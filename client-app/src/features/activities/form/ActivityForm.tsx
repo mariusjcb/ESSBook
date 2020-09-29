@@ -28,6 +28,7 @@ const _ActivityForm: React.FC<IProps> = ({ id, isPage }) => {
         date: "",
         city: "",
         venue: "",
+        comments: []
       };
       return initialValue;
     }
