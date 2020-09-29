@@ -4,7 +4,7 @@ import { Link, RouteComponentProps } from "react-router-dom";
 import { Button, Form, Segment } from "semantic-ui-react";
 import { UUID } from "../../../app/helpers/UUIDGenerator";
 import { IActivity } from "../../../app/models/activity";
-import ActivityStore from "../../../app/stores/activityStore";
+import { RootStoreContext } from "../../../app/stores/rootStore";
 
 interface IProps {
   id: string;
@@ -33,14 +33,14 @@ const _ActivityForm: React.FC<IProps> = ({ id, isPage }) => {
     }
   };
 
-  const activityStore = useContext(ActivityStore);
+  const rootStore = useContext(RootStoreContext);
   const {
     activity: initialFormState,
     createActivity,
     editActivity,
     setEditMode,
     submitting,
-  } = activityStore;
+  } = rootStore.activityStore;
   const [activity, setActivity] = useState<IActivity>(initializeForm);
 
   const handleSubmit = () => {

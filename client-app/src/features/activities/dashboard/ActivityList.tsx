@@ -2,17 +2,17 @@ import { observer } from "mobx-react-lite";
 import React, { useContext } from "react";
 import { Link } from "react-router-dom";
 import { Button, Item, Segment } from "semantic-ui-react";
-import ActivityStore from "../../../app/stores/activityStore";
+import { RootStoreContext } from "../../../app/stores/rootStore";
 
 const ActivityList = () => {
-  const activityStore = useContext(ActivityStore);
+  const rootStore = useContext(RootStoreContext);
   const {
     activitiesSortedByDate: activities,
     selectActivity,
     deleteActivity,
     buttonTarget: target,
     submitting,
-  } = activityStore;
+  } = rootStore.activityStore;
   return (
     <Item.Group divided>
       {activities.map((activity) => (

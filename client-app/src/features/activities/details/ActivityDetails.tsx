@@ -3,7 +3,7 @@ import React, { useContext, useEffect } from "react";
 import { Link, RouteComponentProps } from "react-router-dom";
 import { Button, Card, Grid, Icon, Image, Segment } from "semantic-ui-react";
 import { LoadingComponent } from "../../../app/layout/LoadingComponent";
-import ActivityStore from "../../../app/stores/activityStore";
+import { RootStoreContext } from "../../../app/stores/rootStore";
 import ActivityChat from "./ActivityChat";
 import ActivitySmartDetails from "./ActivitySmartDetails";
 
@@ -17,15 +17,15 @@ interface IDetailPageParams {
 }
 
 const _ActivityDetails: React.FC<IDetailParams> = ({ id, isPage }) => {
-  const activityStore = useContext(ActivityStore);
-  const { editMode, setEditMode } = activityStore;
-  const { activity, loadActivity } = activityStore;
+  const rootStore = useContext(RootStoreContext);
+  const { editMode, setEditMode, loadingInitial } = rootStore.activityStore;
+  const { activity, loadActivity } = rootStore.activityStore;
 
   useEffect(() => {
     loadActivity(id);
   }, [id, loadActivity]);
 
-  if (activityStore.loadingInitial || !activity)
+  if (loadingInitial || !activity)
     return <LoadingComponent content="Loading activity..." />;
 
     if (!activity)
@@ -63,14 +63,15 @@ const _ActivityDetails: React.FC<IDetailParams> = ({ id, isPage }) => {
 const _ActivityDetailsPage: React.FC<RouteComponentProps<
   IDetailPageParams
 >> = ({ match }) => {
-  const activityStore = useContext(ActivityStore);
-  const { activity, loadActivity } = activityStore;
+  const rootStore = useContext(RootStoreContext);
+  const { editMode, setEditMode, loadingInitial } = rootStore.activityStore;
+  const { activity, loadActivity } = rootStore.activityStore;
 
   useEffect(() => {
     loadActivity(match.params.id);
   }, [match.params.id]);
 
-  if (activityStore.loadingInitial)
+  if (loadingInitial)
     return <LoadingComponent content="Loading activity..." />;
 
     if (!activity)

@@ -2,10 +2,13 @@ import { action, computed, configure, observable, runInAction } from "mobx";
 import { createContext, SyntheticEvent } from "react";
 import { IActivity } from "../models/activity";
 import { ActivitiesApi } from "../api/activitesApi";
+import { RootStore } from "./rootStore";
 
 configure({ enforceActions: "always" });
 
-class ActivityStore {
+export default class ActivityStore {
+  rootStore: RootStore;
+
   @observable activityRegistry = new Map();
   @observable activity: IActivity | undefined;
   @observable loadingInitial = false;
@@ -21,6 +24,10 @@ class ActivityStore {
     return this.activities.sort(
       (a, b) => Date.parse(a.date) - Date.parse(b.date)
     );
+  }
+
+  constructor(rootStore: RootStore) {
+    this.rootStore = rootStore;
   }
 
   getActivity(id: string) {
@@ -156,5 +163,3 @@ class ActivityStore {
     }
   };
 }
-
-export default createContext(new ActivityStore());

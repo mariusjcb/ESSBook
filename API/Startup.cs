@@ -22,6 +22,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.Authorization;
+using AutoMapper;
+using static Infrastructure.Security.IsHostRequirementHanlder;
 
 namespace API
 {
@@ -36,9 +38,10 @@ namespace API
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
-        {
+        { 
             services.AddDbContext<DataContext>(opt =>
             {
+                opt.UseLazyLoadingProxies();
                 opt.UseSqlite(Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddCors(opt =>
@@ -49,7 +52,7 @@ namespace API
                 });
             });
             services.AddMediatR(typeof(List.Handler).Assembly);
-
+            services.AddAutoMapper(typeof(List.Handler));
             services.AddApiVersioning(opt => {
                 opt.AssumeDefaultVersionWhenUnspecified = true;
                 opt.DefaultApiVersion = new ApiVersion(1, 0);
@@ -64,8 +67,6 @@ namespace API
                     var policy = policyBuilder.RequireAuthenticatedUser().Build();
                     opt.Filters.Add(new AuthorizeFilter(policy));
                 })
-                .AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Create>())
-                .AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Edit>())
                 .AddFluentValidation(cfg => cfg.RegisterValidatorsFromAssemblyContaining<Create>());
 
             var builder = services.AddIdentity<AppUser, IdentityRole>().AddEntityFrameworkStores<DataContext>();
@@ -73,8 +74,16 @@ namespace API
             identityBuilder.AddEntityFrameworkStores<DbContext>();
             identityBuilder.AddSignInManager<SignInManager<AppUser>>();
 
+            services.AddAuthorization(opt => 
+            {
+                opt.AddPolicy("IsActivityHost", policy => 
+                {
+                    policy.Requirements.Add(new IsHostRequirement());
+                });
+            });
+            services.AddTransient<IAuthorizationHandler, IsHostRequirementHanlder>();
+
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["JwtSecret"]));
-            services.AddScoped<IJWTGenerator, JWTGenerator>();
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme) 
                 .AddJwtBearer(opt => 
                 {
@@ -87,6 +96,8 @@ namespace API
                         IssuerSigningKey = key
                     };
                 });
+            services.AddScoped<IJWTGenerator, JWTGenerator>();
+            services.AddScoped<IUserAccessor, UserAccessor>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

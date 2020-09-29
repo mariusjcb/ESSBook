@@ -7,7 +7,7 @@ export const HomePage = () => {
     <Segment inverted textAlign='center' vertical className='masthead'>
       <Container text style={{padding: 80}}>
         <Header as='h2' inverted content='Hello' style={{paddingBottom: 15}}/>
-        <Button as={Link} to='/activities' size='huge' inverted>
+        <Button as={Link} to='/login' size='huge' inverted>
           Open tha app!
         </Button>
       </Container>
